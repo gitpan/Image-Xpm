@@ -1,11 +1,11 @@
 package Image::Xpm ;    # Documented at the __END__
 
-# $Id: Xpm.pm,v 1.14 2000/05/15 22:11:12 root Exp root $
+# $Id: Xpm.pm,v 1.15 2000/05/25 20:44:37 root Exp $
 
 use strict ;
 
 use vars qw( $VERSION @ISA ) ;
-$VERSION = '1.06' ;
+$VERSION = '1.07' ;
 
 use Image::Base ;
 
@@ -740,6 +740,12 @@ use in the image).
     my $j = $i->new_from_image( ref $i, -cpp => 2 ) ;
 
 =head1 CHANGES
+
+2000/05/25
+
+Fixed a bug in the test file; fixed a bug in save() which affected xpm
+extensions.
+
 
 2000/05/04
 
