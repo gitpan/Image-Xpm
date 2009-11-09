@@ -1,5 +1,8 @@
-Xpm.pm
-t/xpm.t
-MANIFEST
+Changes
 Makefile.PL
+MANIFEST
 README
+t/const.t
+t/xpm.t
+Xpm.pm
+META.yml                                 Module meta-data (added by MakeMaker)

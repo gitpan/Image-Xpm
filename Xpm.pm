@@ -1,11 +1,9 @@
 package Image::Xpm;    # Documented at the __END__
 
-# $Id: Xpm.pm,v 1.17 2000/11/09 19:05:31 mark Exp mark $
-
 use strict;
 
 use vars qw($VERSION @ISA);
-$VERSION = '1.09';
+$VERSION = '1.09_50';
 
 use Image::Base;
 
@@ -167,8 +165,9 @@ sub new { # Class and object method
     $self->{-cc} = ' ' x $self->{-cpp};
 
     my $file = $self->get('-file');
-    $self->load if defined $file and -r $file and not $self->{-pixels};
-
+    if (defined $file and not $self->{-pixels}) {
+    	$self->load if ref $file or -r $file;
+    }
     croak "new() `$file' not found or unreadable" 
     if defined $file and not defined $self->get('-width');
 
@@ -324,8 +323,13 @@ sub load { # Object method
         open $fh, $file or croak "load() failed to open `$file': $!" ;
     }
     elsif( ref($file) eq 'SCALAR' ) {
-        require IO::String;
-        $fh = IO::String->new( $$file );
+	if( $] >= 5.008 ) {
+	    open $fh, "<", $file or croak "cannot handle scalar value: $!";
+	}
+	else {
+	    require IO::String;
+	    $fh = IO::String->new( $$file );
+	}
     }
     else {
         seek($file, 0, 0) or croak "load() can't rewind handle for `$file': $!";
@@ -380,8 +384,11 @@ sub load { # Object method
         }
         # Name of C string
         if ($state == $STATE_ARRAY) {
-            croak "$err does not have a proper C array name"
-            unless /static\s+char\s+\*\s*\w+\[\s*\]\s*=\s*\{/o; #}
+## While this line is specified in the xpm.ps document, the libXpm
+## library itself seems to ignore the contents of this line
+## completely. So Image::Xpm should also do.
+#            croak "$err does not have a proper C array name"
+#            unless /static\s+(?:const\s+)?char\s*\*\s*(?:const\s+)?[A-Za-z0-9_-]+\s*\[\s*\]\s*=\s*\{/o; #}
             $state = $STATE_VALUES;
             next LINE;
         }
@@ -389,7 +396,7 @@ sub load { # Object method
         if ($state == $STATE_VALUES) {
             ($width, $height, $ncolours, $cpp, $hotx, $hoty, $extname) =
             /"\s*(\d+)\s+(\d+)\s+(\d+)\s+(\d+)
-                 (?:\s+(\d+)\s+(\d+))?(?:\s+(\w+))?\s*"/ox;
+                 (?:\s+(-?\d+)\s+(-?\d+))?(?:\s+(\w+))?\s*"/ox;
             croak "$err missing width"            unless defined $width;
             croak "$err missing height"           unless defined $height;
             croak "$err missing ncolours"         unless defined $ncolours;
@@ -448,7 +455,9 @@ sub load { # Object method
         }
         # Finish
         if ($state == $STATE_FINISH) {
-            croak "$err invalid ending" unless /\}\s*;/;
+## The ending brace could also happened in the line before. So don't
+## do any checks anymore here.
+#            croak "$err invalid ending" unless /\}\s*;/;
             last LINE;
         }
     }
@@ -761,35 +770,6 @@ use in the image).
 
     # Could have written 2nd line above as:
     my $j = $i->new_from_image(ref $i, -cpp => 2);
-
-=head1 CHANGES
-
-2000/11/09
-
-Added Jerrad Pierce's patch to allow load() to accept filehandles or strings;
-will document in next release.
-
-
-2000/10/19
-
-Fixed bugs in xy() and vec() reported by Pat Gunn.
-
-
-2000/05/25
-
-Fixed a bug in the test file; fixed a bug in save() which affected xpm
-extensions.
-
-
-2000/05/04
-
-Fixed bugs in xy(), vec(), save() and load(). 
-Improved the test program.
-
-
-2000/05/03 
-
-Created. 
 
 =head1 AUTHOR
 
