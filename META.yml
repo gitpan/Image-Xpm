@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:               Image-Xpm
-version:            1.10
+version:            1.11
 abstract:           Load, create, manipulate and save xpm image files.
 author:
     - Mark Summerfield <summer@perlpress.com>
